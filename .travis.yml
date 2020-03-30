@@ -9,6 +9,7 @@ addons:
   homebrew:
     packages:
       - hdf5
+    update: true
 
 matrix:
   include:
