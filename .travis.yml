@@ -6,10 +6,6 @@ addons:
   apt:
     packages:
       - libhdf5-dev
-  homebrew:
-    packages:
-      - hdf5
-    update: true
 
 matrix:
   include:
