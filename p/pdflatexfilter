@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# this is a filter to transform .tex into .pdf
+# USAGE:
+#        cat a.tex | pdflatexfilter > a.pdf
+#
+# the directory is not poluted by useless files
+
+set -e
+#set -x
+
+T=`mktemp -d /tmp/pdflatexfilter.XXXXXX`
+
+cat /dev/stdin > $T/a.tex
+
+
+
+#pdflatex -interaction nonstopmode -output-directory $T $T/a
+latexmk -pdf -interaction=nonstopmode -output-directory=$T $T/a \
+	>$T/oo 2>$T/oe || cat $T/oo >&2
+
+cat $T/a.pdf
+
+#rm -rf $T

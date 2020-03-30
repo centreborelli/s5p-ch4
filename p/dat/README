@@ -1,0 +1,32 @@
+These files contain spectral curves at two different sites and at two different
+dates.
+
+The sites are:
+
+"c" : A green montanious range near Constantine, Algeria, lonlat = ( 2.72, 33 )
+
+"k" : The Oil refinery at the east of Ouarga, Algeria, ( 6.21915, 31.8341 )
+
+
+The two dates correspond to orbits numbered 11366 (december 2019) and 11550
+(january 2020).  On the second date, a huge plume of methane was observed by
+S5P at the K site.
+
+
+The curves are extracted from the L1 product by running the following script:
+
+for i in {1..8}; do
+	./project -10 50 0 60 1000 1000 ../img/pc/S5P_OFFL_L1B_RA_BD${i}_20191223T121124_20191223T135254_11366_01_010000_20191223T154352.nc -p '2.72 33' > /tmp/curv19_$i
+done
+
+for i in {1..8}; do
+	./project -10 50 0 60 1000 1000 ../img/pc/S5P_OFFL_L1B_RA_BD${i}_20200105T112716_20200105T130846_11550_01_010000_20200105T145137.nc -p '2.72 33' > /tmp/curv20_$i
+done
+
+for i in {1..8}; do
+	./project -10 50 0 60 1000 1000 ../img/pc/S5P_OFFL_L1B_RA_BD${i}_20200105T112716_20200105T130846_11550_01_010000_20200105T145137.nc -p '6.21915 31.8341' > /tmp/kurv20_$i
+done
+
+for i in {1..8}; do
+	./project -10 50 0 60 1000 1000 ../img/pc/S5P_OFFL_L1B_RA_BD${i}_20191223T121124_20191223T135254_11366_01_010000_20191223T154352.nc -p '6.21915 31.8341' > /tmp/kurv19_$i
+done

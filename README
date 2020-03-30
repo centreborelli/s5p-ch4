@@ -1,0 +1,145 @@
+SOME EXPERIMENTS WITH S5P DATA
+==============================
+
+
+INTRODUCTION
+------------
+
+Sentinel 5P "precussor" is equipped with the multi-spectral TROPOMI instrument.
+It will be complemented in a few years by the two "real" Sentinel 5 satellites,
+of higher resolution.
+
+It acquires daily optical nadir images of around 7x7 km resolution (more or
+less, depending on the spectral band).  The main application is the daily
+monitoring of atmospheric chemistry at a global scale.
+
+The data is available in different forms.  The L1B product is an hyperspectral
+image of about 35GB covering a north-south 2000km strip with 4000 spectral bands
+ranging from UV to SWIR.  The L2 product is a summary of some radiometric
+indices extracted from the L1B image, representing the concentrations of a few
+cases in atmosphere (O3, NO2, etc.).
+
+Each product is released twice.  First, with minimal but very fast processing
+just after the acquisition.  Second, with high-quality processing and very
+precise calibration a few days later.  There is maybe a possibility of
+arbitrage in extracting just a part of the data (very localized in time and in
+frequency) at a high quality and immediately.
+
+
+L1B DATA
+--------
+
+The TROPOMI instrument has 8 multi-spectral "bands", where each band has about
+500 spectral samples per pixel.  In the nominal RADIANCE acquisition mode they
+have the following characteristics:
+
+band	type	width	height	pd	size
+1	UV	77	3246	497	1.0GB
+2	UV	448	3246	497	5.6GB
+3	UVIS	450	3246	497	5.7GB
+4	UVIS	450	3246	497	5.7GB
+5	NIR	448	3246	497	5.7GB
+6	NIR	448	3246	497	5.7GB
+7	SWIR	215	3246	480	2.6GB
+8	SWIR	215	3246	480	2.6GB
+
+There are between 10 and 20 such products per day, constituting the bulk of
+the data transmitted by the satellite.
+
+Besides this nominal acquisition mode there are a few further modes named
+IRRADIANCE, CALIBRATION and ENGINEERING, which take place once every 15 orbits
+(approximately once per day).
+
+The IRRADIANCE measures the spectrum of the sun at a particular date.  It is a
+tiny dataset that concerns mostly the UV part of the spectrum, where the
+irradiance varies in a meaningful way.
+
+The CALIBRATION is a full-resolution full-spectrum dataset of about 20GB,
+measuring the biases of each pixel.  It concerns mostly the IR part of the
+spectrum, where the sensor is very delicate and subject to daily degradation.
+
+The ENGINEERING dataset is acquired once per orbit, and it is a small dataset
+of orbit calibration and instrument monitoring.
+
+These four products together constitute the "L1b" data (the L0 data being the
+unprocessed transmission from downlink, which is not publicly available).
+
+
+L2 DATA
+-------
+
+The L1b RADIANCE images are huge and difficult to exploit directly.  Thus the
+L2 product is computed from the L1b data and published a few hours later.
+There is one or more separate L2 files for each gas.  They are low-resolution
+geo-referenced images that take about 1MB each (more if the images contain
+estimated atmospheric profiles instead of only the total column).
+
+The algorithm to extract each gas concentration is conceptually simple.
+
+1. callibrate the spectral data by removing biases in the IR channels
+2. divide the radiance by the irradiance to obtain the reflectance
+3. project the reflectance to the expected profile of each gas
+
+The algorithms are in practice much more complicated, and they provide
+additional measures of the credibility and noise for each concentration.  All
+the algorithms are thoroughly described in the associated documentation for
+each product.
+
+These are the main L2 products:
+
+	O3	ozone total column
+	O3_TCL	ozone tropospheric column
+	O3_PR	ozone profile
+	O3_TPR	ozone tropospheric profile
+	NO2	nitrogen diozide total and tropospheric columns
+	SO2	sulfur dioxide total column
+	CO	carbon monoxide total column
+	CH4	methane total column
+	HCHO	formaldehyde total column
+	CLOUD	cloud fraction, albedo, top preassure
+	AER_AI	UV aerosol index
+	AER_LH	aerosol layer height (mid-level pressure)
+
+We are mostly interested in CH4, but also in the NO2 images because they are
+much more stable.
+
+
+REFERENCES
+----------
+
+There is a huge amount of information describing the whole S5P mission and its
+products.  For image processing, the following pdf files available under the
+"doc/esa" folder, are good starting points:
+
+
+In general:
+
+- Sentinel-5P-Level-1b-Product-Readme-File.pdf
+  A general overview of the level 1 product.  Obligatory short read.
+
+- Sentinel-5P-Level-01B-input-output-data-specification.pdf
+  A detailed description of TROPOMI instrument and the Level 1 product,
+  notably the fields that are included in the L1B files and their meaning.
+
+- Sentinel-5P-TROPOMI-Level-1B-ATBD.pdf
+  A very detailed description of the algorithms concerning level 1 data.
+
+
+For the application to methane detection:
+
+- CH4_PRF_Sentinel-5P-Methane-Product-Readme-File.pdf
+  A general overview of the methane level 2 product.  Obligatory short read.
+
+- CH4_PUM_Sentinel-5P-Level-2-Product-User-Manual-Methane.pdf
+  A detailed overview of the CH4 product, mostly focused on the applications.
+
+- CH4_IODD_Sentinel-5P-Level-2-Input-Output-Data-Definition.pdf
+  A detailed description of the L2/CH4 product files, notably the fields
+  that appear in the file and their meaning.
+
+- CH4_ATBD_Sentinel-5P-TROPOMI-ATBD-Methane-retrieval.pdf
+  A detailed description of the algorithm to measure CH4 from L1B data.
+
+- CH4_OL_Reprocessed-S5p-CH4-orbit-list-1.0.pdf
+  The CH4 products being still in an experimental state, this file gives a list
+  of the few orbits where the CH4 datum is exploitable/available.

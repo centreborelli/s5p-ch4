@@ -1,0 +1,46 @@
+The main program here is the "localize" executable.  It has several different
+uses.  All of them require a single sentinel 5p image (either L1 or L2) and the
+specification of a coordinate grid.
+
+1. No-op
+
+localize -180 180 -90 90 2000 1000 img.nc
+
+# Does nothing.  Just loads the input data and exists.
+# There are SEVEN obligatory input data
+# -180 180 -90 90 : a lon/lat bounding box (this one means the whole globe)
+# 2000 1000       : the width/height of the geographical grid inside the bbx
+# img.nc          : the input S5P image in the format HDF5
+
+
+2. Average summary (for radiances)
+
+localize -180 180 -90 90 2000 1000 L1.nc -s out.npy
+
+# build a summary image with the average of all the radiance samples
+# this is usefol to get a quick view of a L1 band
+# The file out.npy is a gray-level image with NANs where no data was available
+
+
+3. Average summary (for methane)
+
+localize -180 180 -90 90 2000 1000 L2_CH4.nc -s out.npy -d methane_mixing_ratio
+
+# build a summary image with the methane mixing ratio
+# the "-d" option selects the dataset of the file to localize
+# (by default, it is "/radiance")
+
+
+4. Hand-selected frequencies
+
+localize -180 180 -90 90 2000 1000 L1.nc -s out.npy -sf "401 402 403 404 405"
+
+# build a 5-channel image out.npy by slicing the given frequencies from the
+# smile
+
+
+5. Hand-selected pixel
+
+localize -180 180 -90 90 2000 1000 L1.nc -s out.npy -p "lon lat" > curve.txt
+
+# extract the whole spectrum (non-resampled) into a text file
