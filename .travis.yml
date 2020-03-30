@@ -1,0 +1,19 @@
+# build manifest for travis-ci.com
+
+language: c
+
+addons:
+  apt:
+    packages:
+      - libhdf5-dev
+  homebrew:
+    packages:
+      - hdf5
+
+matrix:
+  include:
+    - os: linux
+    - os: osx
+
+script:
+  - make -C src
