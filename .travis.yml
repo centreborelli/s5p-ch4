@@ -13,4 +13,9 @@ matrix:
     - os: osx
 
 script:
-  - make -C src
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        make -C src CFLAGS="-O3 -march=native" LDLIBS="-lm -lhdf5"
+    else
+        make -C src
+    fi
