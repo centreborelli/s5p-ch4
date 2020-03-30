@@ -8,7 +8,7 @@
  *  illustrations.
  */
 
-#include "hdf5/serial/hdf5.h"
+#include "hdf5.h"
 
 #define MAX_NAME 1024
 

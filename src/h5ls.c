@@ -1,4 +1,4 @@
-#include <hdf5/serial/hdf5.h>
+#include <hdf5.h>
 
 // callback function for the iterator
 static herr_t print_shit(hid_t o, const char *n, const H5O_info_t *i, void *d)

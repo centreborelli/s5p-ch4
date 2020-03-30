@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 #include <string.h>
-#include <hdf5/serial/hdf5.h>
+#include <hdf5.h>
 
 //struct twostrings { char *a, *b; };
 //
