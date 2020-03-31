@@ -1,6 +1,6 @@
 // build the inverse of the localization function, i.e. the projection function
 
-// Each S5P product is annotated by its LOCALIZATION function, described by
+// Each S5P L1 product is annotated by its LOCALIZATION function, described by
 // three two-dimensional images with the following names:
 //
 //	/.../GEODATA/latitude
@@ -109,6 +109,8 @@ static void Lpixpix(float out[2], struct projection_data *P, int i, int j)
 	raster_from_geo(out, P, lon, lat);
 }
 
+// evaluate the wavelength localization function
+// from image int (pixel, wavelength_index) to orthoimage float (w,j)
 static void Wpixpix(float out[2], struct projection_data *P, int i, int j)
 {
 	float w = getsamplec(P->Wav, P->nz, P->nx, i, j);
@@ -222,6 +224,12 @@ static void Wpixpix_bil(float out[2], struct projection_data *P, float p, float 
 #include "iio.h"
 #include "fill_bill.c"
 
+static void debug_image(char *n, float *x, int w, int h, int d)
+{
+	if (getenv("DBG_IMAGE"))
+		iio_write_image_float_vec(n, x, w, h, d);
+}
+
 static int insideP(int w, int h, int i, int j)
 {
 	return i >= 0 && j >= 0 && i < w && j < h;
@@ -248,7 +256,7 @@ static void splat_pixels_into_raster(struct projection_data *P)
 		P->P[2*(ip + iq * P->w) + 1] = j;
 	}
 
-	iio_write_image_float_vec("/tmp/dbg_llsplat.npy", P->P, P->w, P->h, 2);
+	debug_image("/tmp/dbg_llsplat.npy", P->P, P->w, P->h, 2);
 }
 
 static void interpolate_splatted_raster(struct projection_data *P)
@@ -258,7 +266,7 @@ static void interpolate_splatted_raster(struct projection_data *P)
 	free(P->P);
 	P->P = tmp;
 
-	iio_write_image_float_vec("/tmp/dbg_illsplat.npy", P->P, P->w, P->h, 2);
+	debug_image("/tmp/dbg_illsplat.npy", P->P, P->w, P->h, 2);
 }
 
 
@@ -387,11 +395,11 @@ static void build_L_from_P(struct projection_data *P)
 		}
 		//char f[FILENAME_MAX];
 		//snprintf(f, FILENAME_MAX, "/tmp/dbg_P%d.npy", iter);
-		//iio_write_image_float_vec(f, P->P, P->w, P->h, 2);
+		//debug_image(f, P->P, P->w, P->h, 2);
 		//to debug, you must invert the loops and remove the breaks
 	}
 	fprintf(stderr, "\t...done\n");
-	iio_write_image_float_vec("/tmp/dbg_P.npy", P->P, P->w, P->h, 2);
+	debug_image("/tmp/dbg_P.npy", P->P, P->w, P->h, 2);
 
 	// visual sanity check that the inverse is correctly computed
 	float *Q = malloc(2 * P->w * P->h * sizeof*Q);
@@ -407,7 +415,7 @@ static void build_L_from_P(struct projection_data *P)
 		else
 			Lpixpix_bil(Q+2*(j*P->w+i),P,p,q);
 	}
-	iio_write_image_float_vec("/tmp/dbg_Q.npy", Q, P->w, P->h, 2);
+	debug_image("/tmp/dbg_Q.npy", Q, P->w, P->h, 2);
 	free(Q);
 
 }
@@ -436,7 +444,7 @@ static void build_F_from_L(struct projection_data *P)
 		if (f_idx < 0 || f_idx >= P->nf) continue;
 		P->F[j*P->nf + f_idx] = i;
 	}
-	iio_write_image_float("/tmp/dbg_F.npy", P->F, P->nf, P->nx);
+	debug_image("/tmp/dbg_F.npy", P->F, P->nf, P->nx, 1);
 
 	// fill-in interior NANS
 	int nfirst[P->nx], nlast[P->nx];
@@ -467,7 +475,7 @@ static void build_F_from_L(struct projection_data *P)
 	//	for (int i = P->nf - 1; i >= P->nf - nlast[j]; i--)
 	//		f[i] =NAN;
 	//}
-	iio_write_image_float("/tmp/dbg_Fi.npy", P->F, P->nf, P->nx);
+	debug_image("/tmp/dbg_Fi.npy", P->F, P->nf, P->nx, 1);
 
 	fprintf(stderr, "building frequential projection...\n");
 	// refine this rhough (i.e. pixellic) data using a few Newton iterations
@@ -494,7 +502,7 @@ static void build_F_from_L(struct projection_data *P)
 		}
 	}
 	fprintf(stderr, "\t...done\n");
-	iio_write_image_float("/tmp/dbg_FiN.npy", P->F, P->nf, P->nx);
+	debug_image("/tmp/dbg_FiN.npy", P->F, P->nf, P->nx, 1);
 
 	// sanity check
 	float *FQ = malloc(P->nx * P->nf * sizeof*FQ);
@@ -514,8 +522,8 @@ static void build_F_from_L(struct projection_data *P)
 		//float w = P->Wav[j*P->nz + w_idx];
 		//FQ[j*P->nf + i] = wlpos_from_wl(P, w);
 	}
-	iio_write_image_float("/tmp/dbg_FQ.npy", FQ, P->nf, P->nx);
-	iio_write_image_float("/tmp/dbg_FQ2.npy", FQ2, P->nf, P->nx);
+	debug_image("/tmp/dbg_FQ.npy", FQ, P->nf, P->nx, 1);
+	debug_image("/tmp/dbg_FQ2.npy", FQ2, P->nf, P->nx, 1);
 }
 
 
@@ -547,10 +555,10 @@ static void projection_data_init(struct projection_data *P, char *fname)
 	if (!P->Lon || !P->Lat)
 		exit(fprintf(stderr, "cannot find localization data\n"));
 
-	iio_write_image_float_vec("/tmp/dbg_lon.npy", P->Lon, w[0],h[0],pd[0]);
-	iio_write_image_float_vec("/tmp/dbg_lat.npy", P->Lat, w[1],h[1],pd[1]);
+	debug_image("/tmp/dbg_lon.npy", P->Lon, w[0],h[0],pd[0]);
+	debug_image("/tmp/dbg_lat.npy", P->Lat, w[1],h[1],pd[1]);
 	if (P->Wav)
-	iio_write_image_float_vec("/tmp/dbg_wav.npy", P->Wav, w[2],h[2],pd[2]);
+	debug_image("/tmp/dbg_wav.npy", P->Wav, w[2],h[2],pd[2]);
 
 	// copy sizes
 	P->nx = w[0]; // == w[1] == h[2]
