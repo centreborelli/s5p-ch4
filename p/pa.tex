@@ -1,0 +1,147 @@
+% global albedo estimation
+
+\documentclass[t]{beamer}
+\usepackage[utf8]{inputenc}  % to be able to type unicode text directly
+%\usepackage[french]{babel}   % french typographical conventions
+\usepackage{inconsolata}     % for a nicer (e.g. non-courier) tt family font
+%\usepackage{amsthm,amsmath}  % fancier mathematics
+\usepackage{array} % to fine-tune tabular spacing
+\usepackage{bbm} % for blackboard 1
+
+\usepackage{graphicx}        % to include images
+%\usepackage{animate}         % to include animated images
+\usepackage{soul}            % for colored strikethrough
+%\usepackage{bbding}          % for Checkmark and XSolidBrush
+\usepackage{hyperref,url}
+
+\colorlet{darkgreen}{black!50!green}  % used for page numbers
+\definecolor{term}{rgb}{.9,.9,.9}     % used for code insets
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+
+
+% coco's macros
+\def\R{\mathbf{R}}
+\def\F{\mathcal{F}}
+\def\x{\mathbf{x}}
+\def\y{\mathbf{y}}
+\def\u{\mathbf{u}}
+\def\Z{\mathbf{Z}}
+\def\d{\mathrm{d}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\reference}[1] {{\scriptsize \color{gray}  #1 }}
+\newcommand{\referencep}[1] {{\tiny \color{gray}  #1 }}
+\newcommand{\unit}[1] {{\tiny \color{gray}  #1 }}
+
+% disable spacing around verbatim
+\usepackage{etoolbox}
+\makeatletter\preto{\@verbatim}{\topsep=0pt \partopsep=0pt }\makeatother
+
+% disable headings, set slide numbers in green
+\mode<all>\setbeamertemplate{navigation symbols}{}
+\defbeamertemplate*{footline}{pagecount}{\leavevmode\hfill\color{darkgreen}
+   \insertframenumber{} / \inserttotalframenumber\hspace*{2ex}\vskip0pt}
+
+%% select red color for strikethrough
+\makeatletter
+\newcommand\SoulColor{%
+  \let\set@color\beamerorig@set@color
+  \let\reset@color\beamerorig@reset@color}
+\makeatother
+\newcommand<>{\St}[1]{\only#2{\SoulColor\st{#1}}}
+\setstcolor{red}
+
+% make everything monospace
+\renewcommand*\familydefault{\ttdefault}
+
+\begin{document}
+
+\begin{frame}[plain,fragile]
+\LARGE
+\begin{verbatim}
+
+
+
+
+
+W.I.P.: S5P L1 global albedo map
+
+
+
+
+\end{verbatim}
+\end{frame}
+
+\begin{frame}
+CONTEXT\\
+=======
+
+{\bf Ambition:}
+build an albedo map of the Earth at the spatial and spectral resolution of
+S5P/TROPOMI
+
+\pause
+
+{\bf Desired output:}
+A 3D image of size~$8000\times4000\times3942$
+%$A(\mathrm{lon},\mathrm{lat},\mathrm{freq})$
+{\color{red}$\approx 100$ GB}
+{\color{pink}($30$ GB without the oceans)}
+
+\pause
+
+{\bf Required input:}
+The whole S5P  archive (!)\\
+{\color{red}$\approx 300$ TB}
+{\color{pink}($30$ days s5phub download)}
+
+\pause
+
+{\bf Naive algorithm:}
+Compute the median reflectance at
+each~$(\mathrm{lon},\mathrm{lat},\mathrm{wavelength})$ over the whole dataset,\\
+{\color{gray}maybe removing clouds, maybe with some regularization}
+
+\pause
+
+{\bf Status: }\pause
+Pure smoke.\\
+\pause
+\color{blue}
+\fbox{
+	$\boldsymbol{+}$ nice by-products (calibration, irradiance scaling).
+}
+
+\end{frame}
+
+
+\begin{frame}
+OVERVIEW\\
+========
+
+1. Anatomy of the TROPOMI sensor
+
+2. Anatomy of a TROPOMI datum
+
+3. Image formation model\\
+(heuristics: sun,atmosphere=sharp; albedo=smooth)
+
+4. Observation of biased pixels (affine model)
+
+5. Correction of the bias using lon/freq regularity (2d)
+
+6. Correction using irradiance measurements (1d)
+
+7. Simple ``methane ratio'' after/before correction
+
+
+
+\end{frame}
+
+
+\end{document}
+
+
+% vim:sw=2 ts=2 spell spelllang=en:

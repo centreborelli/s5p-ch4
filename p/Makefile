@@ -1,4 +1,4 @@
-PDF = p.pdf
+PDF = p.pdf pa.pdf unbiasing.pdf
 
 all: $(PDF)
 

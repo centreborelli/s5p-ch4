@@ -501,19 +501,36 @@ CLOSEUP OF THE SPECTRUM\\
 %SCRIPT      "dat/curv20_8" title "Constantine, 2020, B8" w lines
 %SCRIPT END
 
+%SCRIPT cat <<END | gnuplot > f/curv1920_12.png
+%SCRIPT set term pngcairo crop size 900,600
+%SCRIPT plot "< cat dat/curv19_[1,2]" title "Constantine, 2019, UV" w lines, \
+%SCRIPT      "< cat dat/curv20_[1,2]" title "Constantine, 2020, UV" w lines
+%SCRIPT END
+%SCRIPT cat <<END | gnuplot > f/curv1920_34.png
+%SCRIPT set term pngcairo crop size 900,600
+%SCRIPT plot "< cat dat/curv19_[3,4]" title "Constantine, 2019, UVIS" w lines, \
+%SCRIPT      "< cat dat/curv20_[3,4]" title "Constantine, 2020, UVIS" w lines
+%SCRIPT END
+%SCRIPT cat <<END | gnuplot > f/curv1920_56.png
+%SCRIPT set term pngcairo crop size 900,600
+%SCRIPT plot "< cat dat/curv19_[5,6]" title "Constantine, 2019, NIR" w lines, \
+%SCRIPT      "< cat dat/curv20_[5,6]" title "Constantine, 2020, NIR" w lines
+%SCRIPT END
+%SCRIPT cat <<END | gnuplot > f/curv1920_78.png
+%SCRIPT set term pngcairo crop size 900,600
+%SCRIPT plot "< cat dat/curv19_[7,8]" title "Constantine, 2019, SWIR" w lines, \
+%SCRIPT      "< cat dat/curv20_[7,8]" title "Constantine, 2020, SWIR" w lines
+%SCRIPT END
+
 \begin{frame}
 CLOSEUP OF THE SPECTRUM (constantine, two dates)\\
 ================================================
 \vfill
 
-\only<1>{\includegraphics[width=\linewidth]{f/curv1920_1.png}}
-\only<2>{\includegraphics[width=\linewidth]{f/curv1920_2.png}}
-\only<3>{\includegraphics[width=\linewidth]{f/curv1920_3.png}}
-\only<4>{\includegraphics[width=\linewidth]{f/curv1920_4.png}}
-\only<5>{\includegraphics[width=\linewidth]{f/curv1920_5.png}}
-\only<6>{\includegraphics[width=\linewidth]{f/curv1920_6.png}}
-\only<7>{\includegraphics[width=\linewidth]{f/curv1920_7.png}}
-\only<8>{\includegraphics[width=\linewidth]{f/curv1920_8.png}}
+\only<1>{\includegraphics[width=\linewidth]{f/curv1920_12.png}}
+\only<2>{\includegraphics[width=\linewidth]{f/curv1920_34.png}}
+\only<3>{\includegraphics[width=\linewidth]{f/curv1920_56.png}}
+\only<4>{\includegraphics[width=\linewidth]{f/curv1920_78.png}}
 \end{frame}
 
 
