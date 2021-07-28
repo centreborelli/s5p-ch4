@@ -222,8 +222,35 @@ gases in the sun atmosphere).  Also, the individual pixel biases are very
 visible in the irradiance images.
 
 Thus the second method consists in simply computing the ratio
-radiance/irradiance to obtain a top-of-the-atmosphere reflectance free of
+radiance/irradiance to obtain a top-of-the-atmosphere reflectance with less
 artifacts.
+
+\clearpage
+The effect of computing this ratio for the averages of NIR bands is shown
+below:
+
+\begin{tabular}{ll}
+	\includegraphics[width=0.48\linewidth]{f/b6_avgs_original.png} &
+	\includegraphics[width=0.48\linewidth]{f/b6_avgs_irradiance_corrected.png} \\
+	$B6$ &
+	$B6/IRRADIANCE$ \\
+\end{tabular}
+
+\begin{tabular}{ll}
+	\includegraphics[width=0.48\linewidth]{f/b5_avgs_original.png} &
+	\includegraphics[width=0.48\linewidth]{f/b5_avgs_irradiance_corrected.png} \\
+	$B5$ &
+	$B5/IRRADIANCE$ \\
+\end{tabular}
+
+The effect of the ratio is striking: at some intervals of the spectrum,
+there are no spectral lines in the sun nor in the earth atmospheres and we
+see that the resulting ground albedo is very smooth (almost constant!).
+Moreover all the bad pixels on these bands are correctly removed.
+
+Unfortunately this is not the case for the SWIR band, where the bad pixels
+evolve in a noticeable manner across one day, and this ratio does not remove
+them completely.
 
 \clearpage
 \section{Comparison of both methods}
@@ -238,6 +265,8 @@ Advantages of the first method (data-based):
 		applying this method
 	\item transient pixels due to cosmic rays (which are per-image biases that
 		decay very fast) can be corrected by this method
+	\item can correct some unstable gains in SWIR that appear in only in one
+		image
 \end{enumerate}
 
 Disadvantages of the data-based method:
@@ -260,6 +289,7 @@ Advantages of the second method (irradiance-based):
 		the data is reduced.
 	\item the corrected image is a relative reflectivity and takes values
 		between 0 and 1 (often close to 1).
+	\item visually more useful for bands UV, UVIS and NIR
 \end{enumerate}
 
 Disadvantages of the irradiance-based method:
@@ -273,6 +303,9 @@ Disadvantages of the irradiance-based method:
 		distributed)
 	\item transient pixels cannot be corrected by this method, only long term
 		biases of the sensor
+	\item the SWIR sensor is very unstable and many bad pixels change between
+		the irradiance and the radiance acquisitions.  Thus this method is not
+		too useful for bands 7 and 8 (it leaves a fair amount of artifacts)
 \end{enumerate}
 
 The following graph shows the smoothing effect of dividing the radiance by
