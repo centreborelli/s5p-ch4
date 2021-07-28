@@ -78,7 +78,14 @@ detectors are three identical CCD matrices of size~$1024\times 1024$, of
 which only about~$864$ rows are illuminated by the signal.  The SWIR detector
 is a MCT ROIC matrix of size~$1000\times 256$.
 
-The following 
+The following images show (in normalized logarithmic scale) the input of each
+of the four detectors at the moment the satellite view the sun glint, which
+is visible as the bright horizontal line, especially on the UVIS and NIR
+detectors.  The horizontal lines in the images correspond to the rest of
+geographical features, with the sea begin the two dark bands at the bottom of
+the sensor and around the glint.  The curved almost vertical features are the
+absorption lines on the spectrum due to the earth and sun atmospheres, the
+most prominent one being the~$O_2$ band near the left of the NIR image.
 
 \begin{tabular}{ll}
 	\includegraphics[width=0.48\linewidth]{f/lglint_12.png} &
@@ -90,25 +97,190 @@ The following
 	NIR (bands 5 and 6) & SWIR (bands 7 and 8)
 \end{tabular}
 
+To better understand the geometry of the acquisition, we can compute the
+average of all the spectral samples on band 4 (visible), along a half-orbit.
+This is the resulting image, notice the glint at the southernmost tip of the
+Mediterranean sea.
 
 \begin{tabular}{l}
-\includegraphics[width=\linewidth]{f/slice_b4_glint.png} \\
-Average of all channels on band 4
+\includegraphics[width=\linewidth]{f/rslice_b4_glint.png} \\
+Average of all channels on band 4 (north to the right)
+\end{tabular}
+
+So far, nothing seems obviously wrong in these images.  But there are two
+problems in these images that become apparent when we look at them closely.
+The two sources of anomalous readings are: (1) biases in the gain of each
+pixel, which are not constant but vary slowly in time and (2) transient
+pixels due to cosmic rays hitting the sensor array.  The gain of each pixel
+is typically correlated along columns of the array, giving a characteristic
+texture similar to that of the infrared cameras, that can be corrected by
+standard means.  The transient pixels are isolated in space and frequency and
+can be removed due to the local smoothness of the data.
+
+The disparities in pixel gain become apparent when we compute the average
+of captor acquisitions along track.  We start with band 6 which is slightly
+easier to understand.  This is the average captor input on band 6 along a
+half-orbit, and a detail of its Laplacian:
+
+\begin{tabular}{ll}
+	\includegraphics[width=0.5\linewidth]{f/b6_avgs.png} &
+	\includegraphics[width=0.5\linewidth]{f/b6_lapavgs.png} \\
+	$\mathrm{avg}$ & $\nabla\mathrm{avg}\qquad$ (detail, upper-right corner)
+\end{tabular}
+
+Notice that the Laplacian enhances the location of two ``bad'' pixels.
+
+A similar visualization for the other bands:
+
+\begin{tabular}{llll}
+	\includegraphics[height=0.38\linewidth]{f/b1_lapavgs.png} &
+	\includegraphics[height=0.38\linewidth]{f/b2_lapavgs.png} &
+	\includegraphics[height=0.38\linewidth]{f/b3_lapavgs.png} &
+	\includegraphics[height=0.38\linewidth]{f/b4_lapavgs.png} \\
+	$B1$ & $B2$ & $B3$ & $B4$
+\end{tabular}
+
+\includegraphics[width=\linewidth]{f/b78_avgs.png}%
+$SWIR$
+
+\includegraphics[width=\linewidth]{f/b78_lapavgs.png}%
+$\nabla SWIR$
+
+For the SWIR band the main problem seems to be that the gain of some individual
+pixels is way off.  For the UV and visible bands, the main problem seems to
+be the across-smile texture (that cannot be explained by the image contents),
+as well as a few bad pixels.
+
+The following image shows the effect of the ``bad pixel'' on band 6 when
+slicing the datacube at the frequency index of that pixel:
+
+\includegraphics[width=0.8\linewidth]{f/r6_288_log.png}
+
+The bad pixel is the darker thin line that crosses through the north of
+Corsica.  The thick horizontal darker band through the middle-third of the
+image is part of the~$O_2$ absorption band.
+
+We propose two methods to correct these artifacts.
+
+\clearpage
+\section{Method 1: data-based correction}
+
+The first method to correct the artifacts is based on a single TROPOMI image,
+and using only the radiance measurements.  The algorithm is the following
+
+1. Compute the average sensor signal over the whole datacube.  The result is
+an image~$A$ of the same size as the sensor matrix.
+
+2. Identify points where~$\nabla A$ is abnormally high or low (by setting a
+hard threshold on the Laplacian, different for each band).  These are the
+``bad pixels'' that result on very visible streaks further down the
+processing chain.
+
+3. At the site of each pixels location, scale all the data values along the
+track (latitude) to minimize the difference between that site and the
+four neighboring ones in the (wavelength/longitude) plane.  There are several
+minimization criteria, the simplest one being least squares: in that case the
+scaling factor is simply the value of the Laplacian at that location.
+
+The result of this correction is shown here, to be compared to the previous
+image:
+
+\includegraphics[width=0.8\linewidth]{f/corrected_r6_288_log.png}
+
+This method is particularly useful in the SWIR bands, where there are many
+such bad pixels.  Notice that the structured noise that is formed by
+across-smile lines (and not by isolated bad pixels) is not corrected by this
+method.
+
+\clearpage
+\section{Method 2: irradiance-based correction}
+
+The second method to correct the artifacts is based on the provided TROPOMI
+irradiance data, which is collected once every 15 orbits (once per day).
+This data is obtained by letting unfocused sunlight reach the captor
+directly.  The irradiance data is a single image of the whole sensor array
+that looks like this:
+
+\begin{tabular}{ll}
+	\includegraphics[width=0.48\linewidth]{f/irradiance_12.png} &
+	\includegraphics[width=0.48\linewidth]{f/irradiance_34.png} \\
+	UV (bands 1 and 2)& UVIS (bands 3 and 4) \\
+	& \\
+	\includegraphics[width=0.48\linewidth]{f/irradiance_56.png} &
+	%\includegraphics[width=0.48\linewidth]{f/irradiance_78.png}
+	\\
+	NIR (bands 5 and 6) %& SWIR (bands 7 and 8)
 \end{tabular}
 
 
-There are two sources of anomalous readings: biases in the gain of each pixel
-(which are not constant but vary slowly in time) and transient pixels due to
-cosmic rays hitting the sensor array.  The gain of each pixel is typically
-correlated along columns of the array, giving a characteristic texture
-similar to that of the infrared cameras, that can be corrected by standard
-means.  The transient pixels are isolated in space and frequency and can be
-removed due to the local smoothness of the data.
+\includegraphics[width=\linewidth]{f/irradiance_78.png}\\
+SWIR irradiance (bands 7 and 8)
+
+Notice that there is a lot of data in the irradiance data.  In particular,
+we see that the sun spectrum is not smooth (due to the absorption bands of
+gases in the sun atmosphere).  Also, the individual pixel biases are very
+visible in the irradiance images.
+
+Thus the second method consists in simply computing the ratio
+radiance/irradiance to obtain a top-of-the-atmosphere reflectance free of
+artifacts.
+
+\clearpage
+\section{Comparison of both methods}
+
+Advantages of the first method (data-based):
+
+\begin{enumerate}
+	\item the corrected image has still units of radiance
+	\item only the bad pixels are corrected, the rest of the image is untouched
+	\item the method needs only one image as input
+	\item simple, conservative implementation; there's nothing to lose by
+		applying this method
+	\item transient pixels due to cosmic rays (which are per-image biases that
+		decay very fast) can be corrected by this method
+\end{enumerate}
+
+Disadvantages of the data-based method:
+
+\begin{enumerate}
+	\item complex structured noise of the captor is not corrected, only
+		individual bad pixels
+	\item the method is simple but not trivial, some thresholds need to be set,
+		etc.
+\end{enumerate}
 
 
-\section{Method 1: data-based correction}
+Advantages of the second method (irradiance-based):
 
-\section{Method 2: irradiance-based correction}
+\begin{enumerate}
+	\item the method is trivial: just compute the ratio of two images
+	\item all biases are corrected, not only isolated bad pixels
+	\item the spectrum becomes much smoother, because we remove the spiky sun
+		spectrum (see the graph below).  In other words, the dimensionality of
+		the data is reduced.
+	\item the corrected image is a relative reflectivity and takes values
+		between 0 and 1 (often close to 1).
+\end{enumerate}
+
+Disadvantages of the irradiance-based method:
+
+\begin{enumerate}
+	\item we need to download another file, and it is not clear which one: the
+		irradiance acquired before or after the radiance image?
+	\item the resulting image is unit-less
+	\item inside the spectral holes of the sun light, this method enhances
+		greatly the noise (the noise in the corrected image is not identically
+		distributed)
+	\item transient pixels cannot be corrected by this method, only long term
+		biases of the sensor
+\end{enumerate}
+
+The following graph shows the smoothing effect of dividing the radiance by
+the irradiance (vertical scaling is arbitrary):
+
+\includegraphics[width=\linewidth]{f/pixelratio.png}
+
+
 
 
 \end{document}
