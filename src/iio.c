@@ -5327,10 +5327,6 @@ static void iio_write_image_default(const char *filename, struct iio_image *x)
 		iio_write_image_as_pfm(filename, x);
 		return;
 	}
-	if (string_suffix(filename, ".npy")) {
-		iio_write_image_as_npy(filename, x);
-		return;
-	}
 	if (string_suffix(filename, ".csv") &&
 			(typ==IIO_TYPE_FLOAT || typ==IIO_TYPE_DOUBLE)
 				&& x->pixel_dimension == 1) {
@@ -5365,6 +5361,10 @@ static void iio_write_image_default(const char *filename, struct iio_image *x)
 		iio_write_image_default(filename, x); // recursive call
 		xfree(x->data);
 		x->data = old_data;
+		return;
+	}
+	if (string_suffix(filename, ".npy")) {
+		iio_write_image_as_npy(filename, x);
 		return;
 	}
 #ifdef I_CAN_HAS_LIBTIFF

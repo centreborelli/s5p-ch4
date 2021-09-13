@@ -125,7 +125,7 @@ half-orbit, and a detail of its Laplacian:
 \begin{tabular}{ll}
 	\includegraphics[width=0.5\linewidth]{f/b6_avgs.png} &
 	\includegraphics[width=0.5\linewidth]{f/b6_lapavgs.png} \\
-	$\mathrm{avg}$ & $\nabla\mathrm{avg}\qquad$ (detail, upper-right corner)
+	$\mathrm{avg}$ & $\Delta\mathrm{avg}\qquad$ (detail, upper-right corner)
 \end{tabular}
 
 Notice that the Laplacian enhances the location of two ``bad'' pixels.
@@ -144,7 +144,7 @@ A similar visualization for the other bands:
 $SWIR$
 
 \includegraphics[width=\linewidth]{f/b78_lapavgs.png}%
-$\nabla SWIR$
+$\Delta SWIR$
 
 For the SWIR band the main problem seems to be that the gain of some individual
 pixels is way off.  For the UV and visible bands, the main problem seems to
@@ -171,7 +171,7 @@ and using only the radiance measurements.  The algorithm is the following
 1. Compute the average sensor signal over the whole datacube.  The result is
 an image~$A$ of the same size as the sensor matrix.
 
-2. Identify points where~$\nabla A$ is abnormally high or low (by setting a
+2. Identify points where~$\Delta A$ is abnormally high or low (by setting a
 hard threshold on the Laplacian, different for each band).  These are the
 ``bad pixels'' that result on very visible streaks further down the
 processing chain.
